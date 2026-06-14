@@ -1,0 +1,8 @@
+# 环境变量文件（包含 API Key，不要提交！）
+.env
+.vscode/
+.claude/
+
+# Python 缓存
+__pycache__/
+*.pyc
