@@ -2,7 +2,7 @@ import os
 
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
-from langchain.messages import  HumanMessage, SystemMessage
+from langchain.messages import HumanMessage, SystemMessage
 
 load_dotenv()  # 从 .env 文件加载环境变量
 

@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI 
+from langchain_openai import ChatOpenAI
 
 # 从 .env 文件加载环境变量
 load_dotenv()
