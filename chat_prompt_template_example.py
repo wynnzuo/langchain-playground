@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, SystemMessage
 
 chat_prompt = ChatPromptTemplate(
@@ -39,8 +39,9 @@ print("\n---\n")
 
 chat_prompt3 = ChatPromptTemplate(
     [
-        SystemMessage(content="{answer}"),
-        HumanMessage(content="{question}"),
+        ("system", "你是一个有帮助的助手。"),
+        ("human", "{question}"),
+        ("ai", "{answer}"),
     ]
 )
 messages = chat_prompt3.format_messages(
@@ -50,3 +51,44 @@ messages = chat_prompt3.format_messages(
     }
 )
 print(messages)
+print("\n---\n")
+
+chat_prompt4 = ChatPromptTemplate.from_messages(
+    [
+        ("system", "你是一个有帮助的助手。"),
+        MessagesPlaceholder(variable_name="history"),
+        ("human", "{question}"),
+    ]
+)
+messages = chat_prompt4.format_messages(
+    history=[
+        SystemMessage(content="你是一个有帮助的助手。"),
+        HumanMessage(content="什么是人工智能？"),
+        SystemMessage(
+            content="人工智能是计算机科学的一个分支，致力于创建能够执行通常需要人类智能的任务的系统。"
+        ),
+    ],
+    question="什么是人工智能？",
+)
+print(messages)
+print("\n---\n")
+
+chat_prompt5 = ChatPromptTemplate.from_messages(
+    [
+        ("system", "你是一个有帮助的助手。"),
+        ("placeholder", "{history}"),
+        ("human", "{question}"),
+    ]
+)
+messages = chat_prompt5.format_messages(
+    history=[
+        SystemMessage(content="你是一个有帮助的助手。"),
+        HumanMessage(content="什么是人工智能？"),
+        SystemMessage(
+            content="人工智能是计算机科学的一个分支，致力于创建能够执行通常需要人类智能的任务的系统。"
+        ),
+    ],
+    question="什么是人工智能？",
+)
+print(messages)
+print("\n---\n")
