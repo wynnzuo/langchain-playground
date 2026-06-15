@@ -19,3 +19,4 @@ python-dotenv==1.2.2
 pydantic==2.13.4
 tiktoken==0.13.0
 ollama==0.6.2
+grandalf==0.8
