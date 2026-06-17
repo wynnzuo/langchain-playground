@@ -1,4 +1,6 @@
+# ─────────────────────────────────────────────
 # LangChain 核心框架
+# ─────────────────────────────────────────────
 langchain==1.3.9
 langchain-core==1.4.7
 langchain-community==0.4.2
@@ -6,22 +8,28 @@ langchain-mcp-adapters==0.3.0
 mcp==1.28.0
 tavily==1.1.0
 
-# 模型集成
+# ─────────────────────────────────────────────
+# 模型集成（LLM 驱动 / Embedding）
+# ─────────────────────────────────────────────
 langchain-openai==1.3.2
 langchain-ollama==1.1.0
 langchain-deepseek==1.1.0
 openai==2.41.1
 
-# 其他 LangChain 组件
+# ─────────────────────────────────────────────
+# 其他 LangChain 组件（文本分割 / 图 / 跟踪）
+# ─────────────────────────────────────────────
 langchain-text-splitters==1.1.2
 langgraph==1.2.5
 langsmith==0.8.15
 
+# ─────────────────────────────────────────────
 # 工具库
-python-dotenv==1.2.2
-pydantic==2.13.4
-tiktoken==0.13.0
-ollama==0.6.2
-grandalf==0.8
-redis==5.3.1
-pypdf==6.13.2
+# ─────────────────────────────────────────────
+python-dotenv==1.2.2    # 从 .env 加载环境变量
+pydantic==2.13.4        # 数据模型 / 输出解析
+tiktoken==0.13.0        # Token 计数
+ollama==0.6.2           # Ollama Python SDK
+grandalf==0.8           # 图可视化（链结构打印）
+redis==5.3.1            # Redis 向量搜索 / 聊天记忆
+pypdf==6.13.2           # PDF 文档加载

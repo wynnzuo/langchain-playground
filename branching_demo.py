@@ -2,6 +2,7 @@
 LCEL 分支链（RunnableBranch）示例
 ===================================
 根据输入条件路由到不同的处理链，类似 if/else 但以链式方式组合。
+还演示 RunnableParallel 并行执行以及两者的组合使用。
 """
 
 import os
@@ -15,6 +16,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
+# 初始化 LLM
 llm = init_chat_model(
     model="deepseek-v4-flash",
     temperature=0.3,
@@ -37,23 +39,30 @@ detect_language_prompt = PromptTemplate.from_template(
 detect_chain = detect_language_prompt | llm | StrOutputParser()
 
 # 不同语言的翻译链
-translate_to_chinese = PromptTemplate.from_template(
-    "将以下句子翻译成中文：\n\n{sentence}"
-) | llm | StrOutputParser()
+translate_to_chinese = (
+    PromptTemplate.from_template("将以下句子翻译成中文：\n\n{sentence}")
+    | llm
+    | StrOutputParser()
+)
 
-translate_to_english = PromptTemplate.from_template(
-    "将以下句子翻译成英语：\n\n{sentence}"
-) | llm | StrOutputParser()
+translate_to_english = (
+    PromptTemplate.from_template("将以下句子翻译成英语：\n\n{sentence}")
+    | llm
+    | StrOutputParser()
+)
 
-translate_to_japanese = PromptTemplate.from_template(
-    "将以下句子翻译成日语：\n\n{sentence}"
-) | llm | StrOutputParser()
+translate_to_japanese = (
+    PromptTemplate.from_template("将以下句子翻译成日语：\n\n{sentence}")
+    | llm
+    | StrOutputParser()
+)
 
 # 默认链（其他语言统一翻成中文）
-translate_default = PromptTemplate.from_template(
-    "将以下句子翻译成中文：\n\n{sentence}"
-) | llm | StrOutputParser()
-
+translate_default = (
+    PromptTemplate.from_template("将以下句子翻译成中文：\n\n{sentence}")
+    | llm
+    | StrOutputParser()
+)
 
 # 构建分支：根据语言选择对应的翻译链
 branch = RunnableBranch(
@@ -107,7 +116,8 @@ print(f"摘要:   {result['summary']}")
 print(f"关键词: {result['keywords']}")
 print(f"情感:   {result['sentiment']}")
 
-parallel_chain.get_graph().print_ascii()  # 可视化链结构
+# 可视化链结构
+parallel_chain.get_graph().print_ascii()
 
 
 # ==========================================

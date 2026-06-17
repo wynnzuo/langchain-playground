@@ -2,6 +2,11 @@
 Redis 聊天记忆示例
 ====================
 用 Redis 持久化对话历史，重启程序后记忆不丢失。
+通过 RunnableWithMessageHistory + RedisChatMessageHistory 实现。
+
+前置条件:
+  - Redis Stack 运行中（默认 localhost:6379）
+  - 安装 redis 模块: pip install redis
 """
 
 import os

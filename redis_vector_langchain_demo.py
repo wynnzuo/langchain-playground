@@ -1,5 +1,6 @@
 """
 向量化文本 → 存入 Redis → 向量搜索 + 混合检索  (LangChain 简化版)
+====================================================================
 
 与 redis_vector_demo.py 对比，LangChain 帮你省掉了:
   - Embedding API 的调用封装  → OpenAIEmbeddings
@@ -9,6 +10,7 @@
   - Query 语法拼接            → similarity_search_with_score
   - 结果解析（score bytes 转 float）→ 返回干净的对象
 """
+
 import os
 
 from dotenv import load_dotenv
@@ -72,7 +74,7 @@ def main():
 
     print(f"【纯向量 KNN】查询「{query_text}」→ 命中 {len(results)}\n")
     for i, (doc, score) in enumerate(results):
-        # score 是 cosine 距离; 1 - score 为相似度
+        # score 是 cosine 距离；1 - score 为相似度
         sim = 1 - score
         print(f"  #{i+1}  sim={sim:.4f}  |  {doc.page_content}")
 
@@ -93,7 +95,6 @@ def main():
         print(f"  #{i+1}  sim={sim:.4f}  |  {doc.page_content}")
 
     # ─── 6. 需要操作原生 redis-py 时也能拿到原始连接 ───
-    # 找一条刚写入的数据
     first_key = next(vectorstore.client.scan_iter(match="doc:idx:docs:*"))
     raw = vectorstore.client.hget(first_key, "content_vector")
     print(f"\n{'─' * 50}")

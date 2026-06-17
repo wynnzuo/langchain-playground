@@ -2,6 +2,7 @@
 LCEL 函数链（RunnableLambda / RunnablePassthrough）示例
 ========================================================
 将自定义 Python 函数嵌入 LCEL 链中，实现数据清洗、校验、转换等操作。
+演示四种组合模式：管道连接、透传赋值、链式 LCEL、并行执行。
 """
 
 import os
@@ -11,8 +12,7 @@ from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-from operator import itemgetter
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough, RunnableParallel
 
 load_dotenv()
 
@@ -55,7 +55,7 @@ count_step = RunnableLambda(count_words)
 clean_and_count = clean_step | count_step
 
 result = clean_and_count.invoke("   Hello    world!   This   is   LangChain.   ")
-print(f"输入: '   Hello    world!   This   is   LangChain.   '")
+print("输入: '   Hello    world!   This   is   LangChain.   '")
 print(f"输出: {result}")
 
 
@@ -66,7 +66,7 @@ print("\n" + "=" * 60)
 print("2️⃣  RunnablePassthrough — 透传数据或注入新字段")
 print("=" * 60)
 
-# .assign() 可以在不丢失原有数据的情况下添加新字段
+# .assign() 在不丢失原有数据的情况下添加新字段
 add_timestamp = RunnablePassthrough.assign(
     length=lambda x: len(x["text"]),
     first_word=lambda x: x["text"].split()[0] if x["text"] else "",
@@ -122,11 +122,15 @@ summary_chain = (
 )
 
 test_cases = [
-    {"text": "LangChain is a framework for developing applications powered by large language models. "
-             "It enables applications that are context-aware and reason.",
-     "language": "English"},
-    {"text": "人工智能正在深刻改变各行各业，从医疗诊断到自动驾驶，AI 的应用范围越来越广。",
-     "language": "中文"},
+    {
+        "text": "LangChain is a framework for developing applications powered by large language models. "
+                "It enables applications that are context-aware and reason.",
+        "language": "English",
+    },
+    {
+        "text": "人工智能正在深刻改变各行各业，从医疗诊断到自动驾驶，AI 的应用范围越来越广。",
+        "language": "中文",
+    },
 ]
 
 for case in test_cases:
@@ -155,13 +159,11 @@ def to_string(x: int) -> str:
     return f"结果是: {x}"
 
 
-# 方式一：管道连接
+# 方式一：管道连接（顺序执行）
 pipeline = RunnableLambda(double) | RunnableLambda(add_one) | RunnableLambda(to_string)
 print(f"管道连接: 3 → *2 → +1 → str  =  {pipeline.invoke(3)}")
 
 # 方式二：并行执行
-from langchain_core.runnables import RunnableParallel
-
 parallel = RunnableParallel(
     double=RunnableLambda(double),
     add_one=RunnableLambda(add_one),

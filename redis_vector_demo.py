@@ -1,10 +1,19 @@
 """
 向量化文本 → 存入 Redis Stack (RediSearch) → 向量搜索 + 混合检索  Demo
+=======================================================================
 
 前置条件:
   - Redis Stack 运行中 (docker run ... redis/redis-stack-server)
-  - 环境变量 DASHSCOPE_API_KEY / DASHSCOPE_API_BASE (百炼模型服务)
+  - 环境变量 DASHSCOPE_API_KEY / DASHSCOPE_API_BASE（百炼模型服务）
+
+流程:
+  1. 定义 RediSearch 索引（含 VECTOR 字段）
+  2. 调用百炼 Embedding API 获取向量
+  3. 写入 Redis Hash
+  4. KNN 向量搜索
+  5. TEXT 全文过滤 + 向量重排序的混合检索
 """
+
 import os
 import struct
 from typing import cast
@@ -31,7 +40,7 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
 
 
 def vec_to_bytes(vec: list[float]) -> bytes:
-    """float32 列表 → 小端序 bytes (RediSearch 要求的格式)"""
+    """float32 列表 → 小端序 bytes（RediSearch 要求的格式）"""
     return struct.pack(f"{len(vec)}f", *vec)
 
 
@@ -58,7 +67,7 @@ def main():
     for key in r.scan_iter(match=f"{PREFIX}*"):
         r.delete(key)
 
-    # ─── 2. 创建 RediSearch 索引 (含 VECTOR 字段) ───
+    # ─── 2. 创建 RediSearch 索引（含 VECTOR 字段）───
     r.execute_command(
         "FT.CREATE", INDEX,
         "ON", "HASH",
@@ -118,7 +127,7 @@ def main():
         sim = 1 - score
         print(f"  #{i+1}  sim={sim:.4f}  |  {doc.text}")
 
-    # ─── 5. 混合检索 (TEXT 全文过滤 + 向量重排序) ───
+    # ─── 5. 混合检索（TEXT 全文过滤 + 向量重排序）───
     # 注: RediSearch 中文分词器有限制，中文全文检索用 TAG 更可靠
     print(f"\n{'─' * 50}")
     print("【混合检索】全文含 \"Redis\" → 再向量排序")

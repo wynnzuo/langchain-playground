@@ -1,9 +1,11 @@
 """
 PDF 文档加载与预处理 Demo
-
+===========================
 演示 LangChain 文档加载器的工作流:
   PDF → PyPDFLoader 逐页加载 → RecursiveCharacterTextSplitter 分块
+为后续 RAG / 向量化准备数据。
 """
+
 import os
 from pprint import pprint
 
@@ -38,7 +40,6 @@ def main():
         page_num = doc.metadata.get("page", doc.metadata.get("page_number", i)) + 1
         text = doc.page_content.strip()
         print(f"─── 第 {page_num} 页 (共 {len(text)} 字符) ───")
-        # 只显示前 300 字符
         print(text[:300])
         if len(text) > 300:
             print(f"... (省略 {len(text) - 300} 字符)")

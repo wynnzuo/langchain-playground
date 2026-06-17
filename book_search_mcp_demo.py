@@ -113,16 +113,17 @@ async def search_book(book_name: str, session: ClientSession) -> BookInfo | None
     for i, q in enumerate(queries):
         print(f"🔍 搜索 {i+1}: 「{q}」")
         result = await search_tool.ainvoke({"query": q, "limit": 5})
-        # load_mcp_tools 返回 MCP 原始 list[dict]，提取 text 字段
+        # MCP 返回 list[dict]，提取 text 字段
         if isinstance(result, list):
             text = "\n".join(
-                item["text"] for item in result if isinstance(item, dict) and item.get("type") == "text"
+                item["text"] for item in result
+                if isinstance(item, dict) and item.get("type") == "text"
             )
         else:
             text = str(result)
         raw += f"\n=== {i+1} ===\n{text}"
         if len(text) > 500:
-            break
+            break  # 结果充足就提前结束
 
     t = str(raw)
     print(f"✅ 完成（{len(t)} 字符）")
@@ -148,6 +149,7 @@ async def search_book(book_name: str, session: ClientSession) -> BookInfo | None
 # 5. 输出
 # ==========================================
 def print_book(book: BookInfo):
+    """友好的控制台输出"""
     L = "─" * 50
     print(L)
     print(f"  📚 {book.title}")

@@ -3,8 +3,8 @@ RunnableWithMessageHistory 使用示例
 ======================================
 将 InMemoryChatMessageHistory 与 LCEL 链组合，实现带记忆的多轮对话。
 
-注意：RunnableWithMessageHistory 已废弃，LangChain 推荐改用
-LangGraph 的持久化方案。但对简单的内存对话场景仍然可用。
+注意：RunnableWithMessageHistory 在 LangChain 较新版本中已废弃，
+推荐改用 LangGraph 的持久化方案。但对简单的内存对话场景仍然可用。
 """
 
 import os
@@ -32,10 +32,11 @@ print("=" * 60)
 print("1️⃣  RunnableWithMessageHistory 基础用法")
 print("=" * 60)
 
-# 用一个 dict 存储所有会话，同一个 session_id 返回同一个 history
+# store: 用 dict 存储所有会话，同一 session_id 共享历史
 store: dict[str, InMemoryChatMessageHistory] = {}
 
 def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
+    """按 session_id 获取或创建对话历史"""
     if session_id not in store:
         store[session_id] = InMemoryChatMessageHistory()
     return store[session_id]
@@ -120,7 +121,6 @@ def trim_history(session_id: str, max_pairs: int = 2):
     hist = store.get(session_id)
     if not hist:
         return
-    # 获取原始消息
     msgs = hist.messages
     system_msgs = [m for m in msgs if m.type == "system"]
     non_system = msgs[len(system_msgs):]
