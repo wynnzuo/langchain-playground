@@ -74,7 +74,8 @@ python init_chat_model_demo.py
 
 | 文件 | 说明 |
 |------|------|
-| `weather_agent_demo.py` | `create_react_agent` + 天气查询工具 |
+| `langgraph_demo.py` | **LangGraph 合集** — StateGraph / 条件边 / ReAct / 多 Agent 协作 / MemorySaver |
+| `weather_agent_demo.py` | LangChain Agent 天气查询 |
 | `book_search_demo.py` | `Tavily` 联网搜索 + LLM 提取图书信息 |
 | `book_search_mcp_demo.py` | `MCP` + `langchain-mcp-adapters` 查书 |
 | `agent_france_demo.py` | 基础 Agent 调用示例 |
