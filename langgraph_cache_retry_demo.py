@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, ToolMessage
 from langchain_core.globals import set_llm_cache
 from langchain_community.cache import RedisCache
 from langgraph.graph import StateGraph, MessagesState, START, END
@@ -121,15 +121,32 @@ def get_current_time() -> str:
 tools = [get_city_info, get_calculator_result, get_current_time]
 llm_with_tools = llm.bind_tools(tools)
 
-# ============================================================
-# 4. 构建 LangGraph — 用 with_retry() 实现重试
-# ============================================================
-# ToolNode 本身是 Runnable，直接用 .with_retry() 包装
-# 不需要手写重试循环或引入第三方库
-tool_node = ToolNode(tools).with_retry(
-    stop_after_attempt=3,
-    retry_if_exception_type=(ConnectionError,),
-)
+
+def make_tool_node() -> ToolNode:
+    """创建带重试的工具节点，重试耗尽后不崩溃。
+
+    .with_retry() 用 langchain 内置的指数退避重试（最多 3 次），
+    最后一次仍失败时被 try-except 兜底，返回错误消息而不是崩溃。
+    """
+    retrying = ToolNode(tools).with_retry(
+        stop_after_attempt=3,
+        retry_if_exception_type=(ConnectionError,),
+    )
+
+    def safe_invoke(state: MessagesState) -> dict:
+        try:
+            return retrying.invoke(state)
+        except ConnectionError as e:
+            # 重试 3 次仍失败，捕获后返回带错误信息的 ToolMessage
+            last_msg = state["messages"][-1]
+            tool_call_id = last_msg.tool_calls[0]["id"]
+            print(f"   ❌ 重试耗尽，仍失败: {e}")
+            return {"messages": [ToolMessage(content=f"工具调用失败（已重试 3 次）: {e}", tool_call_id=tool_call_id)]}
+
+    return safe_invoke
+
+
+tool_node = make_tool_node()
 
 
 def agent_node(state: MessagesState) -> dict:
@@ -150,7 +167,7 @@ def should_continue(state: MessagesState) -> Literal["tools", END]:
 
 builder = StateGraph(MessagesState)
 builder.add_node("agent", agent_node)
-builder.add_node("tools", tool_node)          # ← 带 with_retry 的 ToolNode
+builder.add_node("tools", tool_node)          # ← 带 with_retry + try-except 兜底
 
 builder.add_edge(START, "agent")
 builder.add_conditional_edges("agent", should_continue)
@@ -189,7 +206,7 @@ if __name__ == "__main__":
     # ────────── Demo B: with_retry 重试 ──────────
     print_sep("DEMO B: 工具重试 — 故障时自动重试")
     print(f"  get_city_info 有 {FAIL_RATE*100:.0f}% 概率抛出 ConnectionError")
-    print("  ToolNode.with_retry(stop_after_attempt=3) 自动重试\n")
+    print("  每个工具自带 with_retry(stop_after_attempt=3) 独立重试\n")
 
     # 跑 4 次，展示重试效果
     for i in range(4):
