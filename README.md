@@ -75,6 +75,7 @@ python init_chat_model_demo.py
 | 文件 | 说明 |
 |------|------|
 | `langgraph_demo.py` | **LangGraph 合集** — StateGraph / 条件边 / ReAct / 多 Agent 协作 / MemorySaver |
+| `langgraph_cache_retry_demo.py` | **LangGraph 缓存+重试** — Redis LLM 缓存 / 工具结果缓存 / tenacity 重试 |
 | `weather_agent_demo.py` | LangChain Agent 天气查询 |
 | `book_search_demo.py` | `Tavily` 联网搜索 + LLM 提取图书信息 |
 | `book_search_mcp_demo.py` | `MCP` + `langchain-mcp-adapters` 查书 |
